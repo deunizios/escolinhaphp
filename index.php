@@ -39,6 +39,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $comment = "";
     } else {
         $comment = test_input($_POST["comment"]);
+        $comment = wordwrap($comment, 70);
     }
 
     if (empty($_POST["gender"])) {
@@ -46,6 +47,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $gender = test_input($_POST["gender"]);
     }
+    /*     * envio de email* */
+    $to = 'deunizios@gmail.com';
+    $assunto = 'Email através do formulario- Escolinha GERTEC';
+    $mensagem = "De: $name <$email> \r\n";
+    $mensagem .= "Website: $website \r\n";
+    $mensagem .= "Gênero: $gender \r\n";
+    $mensagem .= "Comentários \r\n\n $comment";
+    $headers = "From: $name <$email> \r\n" .
+            'X-Mailer: PHP/' . phpversion();
+    
+    //se não houver erros envia o email
+    if (strlen($nameErr) == 0 &&
+            strlen($emailErr) == 0 &&
+            strlen($websiteErr) == 0 &&
+            strlen($name) != 0 &&
+            strlen($email) != 0) {
+
+        mail($para, $assunto, $mensagem, $headers);
+        $statusMail = TRUE;
+    } else
+        $statusMail = FALSE;
+    /*     * final da função de envio de e-mail* */
 }
 
 //Limpeza dos dados de entrada        
@@ -91,7 +114,7 @@ function test_input($data) {
             <input type="text" name="website"class="<?= strlen($websiteErr) != 0 ? "err" : ""; ?>" value="<?php $website; ?>">
             <span class="error"><?php echo $websiteErr; ?></span>
             <br><br>
-            Comment: <textarea name="comment" rows="5" cols="40" <?= $comment;?>></textarea>
+            Comment: <textarea name="comment" rows="5" cols="40" <?= $comment; ?>></textarea>
             <br><br>
             Gender:
             <input type="radio" name="gender" value="female" class="<?= strlen($genderErr) != 0 ? "err" : ""; ?>"<?php if (isset($gender) && $gender == "female") echo "checked"; ?>
@@ -102,5 +125,12 @@ function test_input($data) {
             <br><br>
             <input type="submit" name="submit" value="Submit"> 
         </form>
+        <?php
+        if (isset($statusMail) && $statusMail) {
+            echo "<h1>E-mail enviado!</h1>";
+        } else {
+            echo "<h1 class='err'>E-mail não enviado!</h1>";
+        }
+        ?>
     </body>
 </html>
